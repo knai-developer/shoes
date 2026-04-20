@@ -1,0 +1,214 @@
+PROJECT OVERVIEW
+Build a premium, ultra-detailed, long-form, commercial-grade e-commerce website for "TimberTails" — a brand selling handcrafted wooden decor. The website must be a single HTML file with embedded CSS, JavaScript, TailwindCSS, Font Awesome icons, and all interactive features. This should be a comprehensive website that spans 15+ scroll sections, not a short landing page.
+
+CRITICAL LAYOUT REQUIREMENTS
+Product Grid: EXACTLY 3 columns on desktop (lg:grid-cols-3), 2 columns on tablet, 1 column on mobile
+
+Website Length: Minimum 15 distinct sections (not counting header/footer) — this must be a LONG, detailed website
+
+Scroll Experience: User should need to scroll significantly to see all content
+
+Advanced UI/UX: Modern animations, hover effects, parallax effects, smooth transitions throughout
+
+BRAND IDENTITY
+Brand Name: TimberTails
+
+Logo: Use local image file logo.png (placed in same directory)
+
+Hero Background: hero.jpg
+
+Tagline: "Handcrafted Wooden Decor for Your Home"
+
+Colors: Primary wood color #8B4513, secondary #D2B48C, background #f5f5f0 (stone-50)
+
+IMAGE FILES (ALL LOCAL, NO EXTERNAL LINKS)
+Use these exact filenames (place in root folder):
+
+hero.jpg — hero background
+
+logo.png — brand logo
+
+product 1.jpg through product 10.jpg — product images (10 total)
+
+Premium Quality & Craftsmanship.jpg — craftsmanship section image (used in multiple sections)
+
+gallery 1.jpg, gallery 2.jpg, gallery 3.jpg, gallery 4.jpg — showcase gallery
+
+For product modals: each product displays the SAME image 5 times in the carousel (use the respective product image for all 5 thumbnails).
+
+COMPLETE PRODUCT DATA (10 PRODUCTS)
+Rustic Floating Shelf — PKR 3500 — Handcrafted from solid oak, holds up to 30kg. Unique grain pattern. — Category: Home Decor
+
+Wooden Table Lamp — PKR 4200 — Warm ambient lighting with hand-turned walnut base. — Category: Lighting
+
+Carved Wall Art Panel — PKR 5800 — Intricate mandala carving, natural beeswax finish. — Category: Home Decor
+
+Wooden Storage Box — PKR 2800 — Perfect for keepsakes, dovetail joinery. — Category: Storage
+
+Wooden Bookends Set — PKR 3200 — Set of two, heavy solid wood, non-slip base. — Category: Home Decor
+
+Wooden Picture Frame — PKR 1800 — A4 size, handmade miters, includes glass. — Category: Home Decor
+
+Wooden Desk Organizer — PKR 4500 — 5 compartments, phone slot, cable hole. — Category: Storage
+
+Wooden Candle Holder — PKR 2200 — Floating effect, fits standard candles. — Category: Home Decor
+
+Wooden Wall Mirror — PKR 6500 — Round mirror, solid ash frame, wall mount included. — Category: Home Decor
+
+Wooden Plant Stand — PKR 3800 — *Mid-century style, supports up to 15kg.* — Category: Home Decor
+
+REQUIRED SECTIONS (IN ORDER - ALL MUST BE PRESENT)
+Sticky Header — Brand logo + navigation + cart icon with live badge count
+
+Hero Section (Full Screen) — Background image with gradient overlay, tagline, description, CTA button with smooth scroll
+
+Trust Bar (Animated Marquee) — Horizontal scrolling strip with: Free Delivery, COD, Sustainable Wood, 5-Star Rating
+
+Featured Products Grid — 3-column layout, all 10 products, each with hover zoom, quick add button, click for modal
+
+Category Filter Pills — Buttons to filter products by category (All, Home Decor, Lighting, Storage)
+
+Limited Time Offer Section — Countdown timer (3 days), discount text, CTA button
+
+Artisan Story Section — Left: text with features (100% Handmade, Traditional Techniques, Eco-Friendly), Right: image
+
+Why Choose Us (3 Cards) — Icons with numbers: 2,000+ trees preserved, 5-Year Warranty, 45+ Master Craftsmen
+
+Premium Quality Section — Image left, text right with sustainable points
+
+Gallery Showcase — 4-image grid with parallax background, hover zoom effects
+
+Bespoke Design Studio — Custom order section with 3 features (Free Consultation, 3D Mockups, Installation Support)
+
+Customer Reviews (3 testimonials) — 5-star ratings, names with cities (Karachi, Lahore, Islamabad)
+
+Instagram / Social Proof — Grid of recent posts, call to action
+
+FAQ Accordion — 6 questions, expand/collapse functionality, one open at a time
+
+Final CTA Section — Dark background, strong text, two buttons (Shop Now, WhatsApp Order)
+
+Comprehensive Footer — Logo + description, quick links, contact info (address, phone, WhatsApp), social icons
+
+CORE FUNCTIONALITY
+Cart System:
+
+Store cart items in JavaScript array with localStorage persistence
+
+Cart sidebar slides from right, shows all items with quantity controls (+/-) and remove button
+
+Update cart badge count and total price in real time
+
+"Proceed to Checkout" button opens order modal
+
+Product Modal (Quick View):
+
+Opens when clicking ANY product card
+
+Shows: product title, price, main image, 5 thumbnail carousel (same image repeated), quantity selector (+/-)
+
+Two buttons: "Add to Cart" (adds, closes modal, silent) and "Buy Now" (adds, closes modal, opens cart sidebar)
+
+NO browser notifications/alerts when adding to cart
+
+Order Modal (Checkout):
+
+Form fields: First Name, Last Name, Address, WhatsApp Number, Notes (optional)
+
+On submit: generates WhatsApp message with all cart items, totals, customer details
+
+Sends to +923140607452, clears cart, closes modal, resets form
+
+Message format includes product list with quantities, total price, customer info, "COD payment" note
+
+Button Styling Rules (CRITICAL):
+
+ALL "Add to Cart" and "Buy Now" buttons:
+
+Text color: #8B4513 (wood color)
+
+Border: 2px solid #8B4513
+
+Background: transparent
+
+On hover: only subtle background rgba(139, 69, 19, 0.08) appears, text stays wood color
+
+"Proceed to Checkout" button: solid wood background (#8B4513) with white text
+
+Category filter pills: border wood color, on active: solid wood background with white text
+
+ANIMATIONS & EFFECTS (ALL REQUIRED)
+Smooth scroll on all anchor links
+
+Fade-up reveal on scroll for sections (Intersection Observer)
+
+Hover zoom on product images (scale 1.08-1.12)
+
+Card lift on product hover (translateY)
+
+Marquee animation for trust bar (infinite scroll)
+
+Parallax background on gallery section
+
+Countdown timer with live update
+
+FAQ accordion with rotating chevron icons
+
+Toast message (non-intrusive) when product added to cart
+
+TECHNICAL SPECIFICATIONS
+Framework: TailwindCSS 3.4.16 (via CDN)
+
+Fonts: Google Fonts — Pacifico (for logo), Inter (for body text)
+
+Icons: Font Awesome 6 Free CDN
+
+Responsive: Mobile-first design, 3-column grid on desktop, 2 on tablet, 1 on mobile
+
+Fixed Header: Sticky at top with backdrop blur (bg-white/95 backdrop-blur-md)
+
+Gradient Overlays: Hero section and gallery section have proper dark overlays
+
+Cart Sidebar: Full-height overlay on right side, max-width 450px, with close button
+
+Modal System: Two modals (product view + order form) with overlay click-to-close
+
+localStorage: Cart persistence across page refreshes
+
+EXACT TEXT COPY TO USE
+Hero Description:
+"Every piece tells a story of traditional craftsmanship and natural beauty. Our artisans carefully select premium wood to create unique, sustainable decor that brings warmth and character to your living spaces."
+
+Artisan Story Text:
+"Behind every TimberTails piece is an artisan who transforms raw timber into heirloom art. Using only hand-selected oak, walnut, and teak, our workshops combine ancestral joinery techniques with modern sustainable practices."
+
+Quality Section Description:
+"Each piece is meticulously handcrafted by skilled artisans using traditional techniques passed down through generations. We source only the finest sustainable wood materials to ensure durability and natural beauty."
+
+Bespoke Studio Text:
+"From custom dimensions to unique engravings, our design team collaborates with you to create one-of-a-kind wooden furniture, wall art or shelves that fit your space perfectly."
+
+Footer Description:
+"Handcrafted wooden decor that brings natural beauty and warmth to your home. Each piece is uniquely made with love and traditional craftsmanship."
+
+WHAT TO EXCLUDE
+No external image URLs (only local filenames)
+
+No alert() or confirm() popups for cart actions (silent add only)
+
+No 4-column product grids (must be exactly 3 columns on desktop)
+
+No short websites (must have all 15+ sections)
+
+QUALITY EXPECTATIONS
+Commercial-grade UI/UX with professional spacing and typography
+
+All interactive elements fully functional
+
+Smooth, polished animations on hover and scroll
+
+Mobile responsive with proper touch targets
+
+Clean, maintainable code structure
+
+No console errors

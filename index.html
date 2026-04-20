@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SoleStride — Walk in Style</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        brand: '#1a1a2e',
+        accent: '#e94560',
+        light: '#f8f7f4',
+        mid: '#c9b99a',
+      },
+      fontFamily: {
+        display: ['Bebas Neue', 'sans-serif'],
+        body: ['Montserrat', 'sans-serif'],
+      }
+    }
+  }
+}
+</script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Montserrat', sans-serif; background: #f8f7f4; color: #1a1a2e; overflow-x: hidden; }
+
+  /* ---- MARQUEE ---- */
+  @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  .marquee-track { display: flex; width: max-content; animation: marquee 22s linear infinite; }
+  .marquee-wrap:hover .marquee-track { animation-play-state: paused; }
+
+  /* ---- FADE UP ---- */
+  .fade-up { opacity: 0; transform: translateY(40px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .fade-up.visible { opacity: 1; transform: translateY(0); }
+
+  /* ---- PRODUCT CARD ---- */
+  .product-card { background: #fff; border-radius: 16px; overflow: hidden; transition: box-shadow 0.3s, transform 0.3s; cursor: pointer; }
+  .product-card:hover { box-shadow: 0 20px 50px rgba(26,26,46,0.15); transform: translateY(-6px); }
+  .product-card .card-img { overflow: hidden; }
+  .product-card .card-img img { width: 100%; height: 260px; object-fit: cover; transition: transform 0.45s ease; }
+  .product-card:hover .card-img img { transform: scale(1.1); }
+
+  /* ---- BUTTONS ---- */
+  .btn-outline { color: #e94560; border: 2px solid #e94560; background: transparent; padding: 10px 24px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: background 0.2s; letter-spacing: 0.03em; }
+  .btn-outline:hover { background: rgba(233,69,96,0.08); }
+  .btn-solid { background: #e94560; color: #fff; border: 2px solid #e94560; padding: 10px 24px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: background 0.2s; letter-spacing: 0.03em; }
+  .btn-solid:hover { background: #c73550; border-color: #c73550; }
+
+  /* ---- FILTER PILLS ---- */
+  .filter-pill { border: 2px solid #e94560; color: #e94560; background: transparent; padding: 8px 22px; border-radius: 999px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .filter-pill.active, .filter-pill:hover { background: #e94560; color: #fff; }
+
+  /* ---- HERO ---- */
+  .hero-section { position: relative; min-height: 100vh; display: flex; align-items: center; background: url('hero.jpg') center/cover no-repeat; }
+  .hero-section::after { content: ''; position: absolute; inset: 0; background: linear-gradient(120deg, rgba(26,26,46,0.82) 40%, rgba(233,69,96,0.2) 100%); }
+  .hero-content { position: relative; z-index: 2; }
+
+  /* ---- GALLERY PARALLAX ---- */
+  .gallery-bg { background: url('Premium Quality & Craftsmanship.jpg') center/cover fixed no-repeat; }
+  .gallery-bg::before { content: ''; position: absolute; inset: 0; background: rgba(26,26,46,0.65); }
+
+  /* ---- CART SIDEBAR ---- */
+  #cartSidebar { position: fixed; top: 0; right: -480px; width: 100%; max-width: 450px; height: 100%; background: #fff; z-index: 9999; box-shadow: -8px 0 40px rgba(0,0,0,0.18); transition: right 0.4s cubic-bezier(0.4,0,0.2,1); overflow-y: auto; }
+  #cartSidebar.open { right: 0; }
+  #cartOverlay { position: fixed; inset: 0; background: rgba(26,26,46,0.5); z-index: 9998; display: none; }
+  #cartOverlay.open { display: block; }
+
+  /* ---- MODAL ---- */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(26,26,46,0.6); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 16px; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+  .modal-overlay.open { opacity: 1; pointer-events: auto; }
+  .modal-box { background: #fff; border-radius: 20px; max-width: 820px; width: 100%; max-height: 90vh; overflow-y: auto; transform: scale(0.95); transition: transform 0.3s; }
+  .modal-overlay.open .modal-box { transform: scale(1); }
+
+  /* ---- TOAST ---- */
+  #toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px); background: #1a1a2e; color: #fff; padding: 14px 28px; border-radius: 50px; font-size: 14px; font-weight: 600; z-index: 99999; transition: transform 0.4s ease; box-shadow: 0 8px 30px rgba(0,0,0,0.25); }
+  #toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ---- FAQ ---- */
+  .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+  .faq-answer.open { max-height: 300px; }
+  .faq-chevron { transition: transform 0.3s; }
+  .faq-chevron.rotated { transform: rotate(180deg); }
+
+  /* ---- COUNTDOWN ---- */
+  .countdown-box { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); border-radius: 12px; padding: 12px 18px; min-width: 70px; text-align: center; }
+
+  /* ---- STICKY HEADER ---- */
+  #mainHeader { position: sticky; top: 0; z-index: 1000; background: rgba(26,26,46,0.97); backdrop-filter: blur(12px); }
+
+  /* ---- THUMBNAIL CAROUSEL ---- */
+  .thumb { border: 2px solid transparent; border-radius: 8px; overflow: hidden; cursor: pointer; transition: border-color 0.2s; }
+  .thumb.active, .thumb:hover { border-color: #e94560; }
+  .thumb img { width: 60px; height: 60px; object-fit: cover; display: block; }
+
+  /* ---- SIZE SELECTOR ---- */
+  .size-btn { border: 1.5px solid #ddd; border-radius: 6px; padding: 6px 12px; font-size: 13px; cursor: pointer; transition: all 0.2s; font-family: 'Montserrat', sans-serif; }
+  .size-btn:hover, .size-btn.selected { border-color: #e94560; background: #e94560; color: #fff; }
+
+  /* ---- CATEGORY CARD ---- */
+  .cat-card { position: relative; border-radius: 16px; overflow: hidden; cursor: pointer; }
+  .cat-card img { width: 100%; height: 380px; object-fit: cover; transition: transform 0.5s; }
+  .cat-card:hover img { transform: scale(1.06); }
+  .cat-card .cat-label { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(26,26,46,0.85)); padding: 40px 24px 24px; }
+
+  /* ---- SCROLLBAR ---- */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-thumb { background: #c9b99a; border-radius: 99px; }
+</style>
+</head>
+<body>
+
+<!-- ===================== TOAST ===================== -->
+<div id="toast"><i class="fa-solid fa-bag-shopping mr-2"></i><span id="toastMsg">Added to cart!</span></div>
+
+<!-- ===================== HEADER ===================== -->
+<header id="mainHeader">
+  <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+    <a href="#hero" class="flex items-center gap-3">
+      <img src="logo.png" alt="SoleStride" class="h-10 w-10 object-contain rounded-lg" onerror="this.style.display='none'"/>
+      <span style="font-family:'Bebas Neue',sans-serif; font-size:28px; color:#fff; letter-spacing:2px;">Sole<span style="color:#e94560;">Stride</span></span>
+    </a>
+    <nav class="hidden md:flex items-center gap-8">
+      <a href="#products" class="text-white/80 hover:text-white text-sm font-medium transition">Shop</a>
+      <a href="#categories" class="text-white/80 hover:text-white text-sm font-medium transition">Categories</a>
+      <a href="#story" class="text-white/80 hover:text-white text-sm font-medium transition">Our Story</a>
+      <a href="#reviews" class="text-white/80 hover:text-white text-sm font-medium transition">Reviews</a>
+      <a href="#faq" class="text-white/80 hover:text-white text-sm font-medium transition">FAQ</a>
+    </nav>
+    <div class="flex items-center gap-4">
+      <button onclick="openCart()" class="relative text-white hover:text-accent transition">
+        <i class="fa-solid fa-bag-shopping text-xl"></i>
+        <span id="cartBadge" class="absolute -top-2 -right-2 bg-accent text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold hidden">0</span>
+      </button>
+      <button class="md:hidden text-white text-xl" onclick="document.getElementById('mobileNav').classList.toggle('hidden')">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+    </div>
+  </div>
+  <div id="mobileNav" class="hidden md:hidden bg-brand px-4 pb-4">
+    <a href="#products" class="block text-white/80 py-2 text-sm">Shop</a>
+    <a href="#categories" class="block text-white/80 py-2 text-sm">Categories</a>
+    <a href="#story" class="block text-white/80 py-2 text-sm">Our Story</a>
+    <a href="#reviews" class="block text-white/80 py-2 text-sm">Reviews</a>
+    <a href="#faq" class="block text-white/80 py-2 text-sm">FAQ</a>
+  </div>
+</header>
+
+<!-- ===================== HERO ===================== -->
+<section id="hero" class="hero-section">
+  <div class="hero-content max-w-7xl mx-auto px-6 py-20 w-full">
+    <div class="max-w-2xl">
+      <p class="text-accent font-semibold text-sm tracking-widest mb-4 uppercase">New Season 2025</p>
+      <h1 style="font-family:'Bebas Neue',sans-serif; font-size:clamp(60px,8vw,110px); line-height:0.95; color:#fff; letter-spacing:2px;">Walk In<br/><span style="color:#e94560;">Style.</span></h1>
+      <p class="text-white/75 text-lg mt-6 mb-8 leading-relaxed max-w-lg">Every step tells a story. Discover handpicked footwear for Men, Women & Kids — crafted for comfort, designed for life. From street to summit, SoleStride has you covered.</p>
+      <div class="flex gap-4 flex-wrap">
+        <a href="#products"><button class="btn-solid text-base px-8 py-4">Shop Now <i class="fa-solid fa-arrow-right ml-2"></i></button></a>
+        <a href="#categories"><button class="btn-outline text-base px-8 py-4" style="color:#fff;border-color:rgba(255,255,255,0.4);">Browse Categories</button></a>
+      </div>
+      <div class="flex gap-8 mt-12">
+        <div><p style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:#fff;">500+</p><p class="text-white/60 text-sm">Styles Available</p></div>
+        <div><p style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:#fff;">10K+</p><p class="text-white/60 text-sm">Happy Customers</p></div>
+        <div><p style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:#fff;">4.9★</p><p class="text-white/60 text-sm">Average Rating</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== TRUST BAR ===================== -->
+<section class="bg-accent py-3 overflow-hidden marquee-wrap">
+  <div class="marquee-track">
+    <div class="flex items-center gap-12 pr-12 text-white font-semibold text-sm whitespace-nowrap">
+      <span><i class="fa-solid fa-truck mr-2"></i>Free Delivery on Orders over PKR 3000</span>
+      <span><i class="fa-solid fa-money-bill-wave mr-2"></i>Cash on Delivery Available</span>
+      <span><i class="fa-solid fa-star mr-2"></i>5-Star Rated Footwear Brand</span>
+      <span><i class="fa-solid fa-rotate-left mr-2"></i>30-Day Easy Returns</span>
+      <span><i class="fa-solid fa-shield-halved mr-2"></i>100% Authentic Products</span>
+      <span><i class="fa-solid fa-bolt mr-2"></i>Same-Day Dispatch</span>
+      <span><i class="fa-solid fa-gift mr-2"></i>Free Gift Wrapping</span>
+      <span><i class="fa-solid fa-headset mr-2"></i>24/7 Customer Support</span>
+    </div>
+    <div class="flex items-center gap-12 pr-12 text-white font-semibold text-sm whitespace-nowrap">
+      <span><i class="fa-solid fa-truck mr-2"></i>Free Delivery on Orders over PKR 3000</span>
+      <span><i class="fa-solid fa-money-bill-wave mr-2"></i>Cash on Delivery Available</span>
+      <span><i class="fa-solid fa-star mr-2"></i>5-Star Rated Footwear Brand</span>
+      <span><i class="fa-solid fa-rotate-left mr-2"></i>30-Day Easy Returns</span>
+      <span><i class="fa-solid fa-shield-halved mr-2"></i>100% Authentic Products</span>
+      <span><i class="fa-solid fa-bolt mr-2"></i>Same-Day Dispatch</span>
+      <span><i class="fa-solid fa-gift mr-2"></i>Free Gift Wrapping</span>
+      <span><i class="fa-solid fa-headset mr-2"></i>24/7 Customer Support</span>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== CATEGORY SHOWCASE ===================== -->
+<section id="categories" class="py-20 px-4">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center mb-12 fade-up">
+      <p class="text-accent font-semibold text-sm tracking-widest uppercase mb-2">Shop by Category</p>
+      <h2 style="font-family:'Bebas Neue',sans-serif;font-size:clamp(36px,5vw,56px);letter-spacing:2px;">Find Your Perfect Fit</h2>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 fade-up">
+      <div class="cat-card" onclick="filterCategory('Men')">
+        <img src="product 1.jpg" alt="Men's Shoes" onerror="this.src='https://placehold.co/600x380/1a1a2e/fff?text=Men'"/>
+        <div class="cat-label">
+          <p class="text-white font-bold text-2xl" style="font-family:'Bebas Neue',sans-serif;letter-spacing:2px;">Men's Collection</p>
+          <p class="text-white/70 text-sm mt-1">Sports, Casual & Formal</p>
+          <span class="inline-block mt-2 text-accent text-sm font-semibold">Shop Now <i class="fa-solid fa-arrow-right ml-1"></i></span>
+        </div>
+      </div>
+      <div class="cat-card" onclick="filterCategory('Women')">
+        <img src="product 4.jpg" alt="Women's Shoes" onerror="this.src='https://placehold.co/600x380/e94560/fff?text=Women'"/>
+        <div class="cat-label">
+          <p class="text-white font-bold text-2xl" style="font-family:'Bebas Neue',sans-serif;letter-spacing:2px;">Women's Collection</p>
+          <p class="text-white/70 text-sm mt-1">Heels, Flats & Sneakers</p>
+          <span class="inline-block mt-2 text-accent text-sm font-semibold">Shop Now <i class="fa-solid fa-arrow-right ml-1"></i></span>
+        </div>
+      </div>
+      <div class="cat-card" onclick="filterCategory('Kids')">
+        <img src="product 7.jpg" alt="Kids' Shoes" onerror="this.src='https://placehold.co/600x380/c9b99a/fff?text=Kids'"/>
+        <div class="cat-label">
+          <p class="text-white font-bold text-2xl" style="font-family:'Bebas Neue',sans-serif;letter-spacing:2px;">Kids' Collection</p>
+          <p class="text-white/70 text-sm mt-1">Comfy & Durable Styles</p>
+          <span class="inline-block mt-2 text-accent text-sm font-semibold">Shop Now <i class="fa-solid fa-arrow-right ml-1"></i></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== FILTER + PRODUCTS ===================== -->
+<section id="products" class="py-16 px-4 bg-white">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center mb-8 fade-up">
+      <p class="text-accent font-semibold text-sm tracking-widest uppercase mb-2">Our Collection</p>
+      <h2 style="font-family:'Bebas Neue',sans-serif;font-size:clamp(36px,5vw,56px);letter-spacing:2px;">Featured Products</h2>
+    </div>
+    <!-- Filter Pills -->
+    <div class="flex flex-wrap gap-3 justify-center mb-10 fade-up" id="filterPills">
+      <button class="filter-pill active" onclick="filterCategory('All')">All</button>
+      <button class="filter-pill" onclick="filterCategory('Men')">Men</button>
+      <button class="filter-pill" onclick="filterCategory('Women')">Women</button>
+      <button class="filter-pill" onclick="filterCategory('Kids')">Kids</button>
+    </div>
+    <!-- Product Grid -->
+    <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+    </div>
+  </div>
+</section>
+
+<!-- ===================== LIMITED TIME OFFER ===================== -->
+<section class="py-20 px-4" style="background:linear-gradient(135deg,#1a1a2e 60%,#2d1b3d 100%);">
+  <div class="max-w-4xl mx-auto text-center fade-up">
+    <p class="text-accent font-semibold text-sm tracking-widest uppercase mb-3">Limited Time Only</p>
+    <h2 style="font-family:'Bebas Neue',sans-serif;font-size:clamp(40px,6vw,72px);color:#fff;letter-spacing:2px;">Season Sale — Up to <span style="color:#e94560;">40% Off</span></h2>
+    <p class="text-white/70 mt-4 text-base max-w-lg mx-auto">Premium footwear at unbeatable prices. Don't miss out — offer ends soon!</p>
+    <div class="flex gap-4 justify-center mt-8 flex-wrap">
+      <div class="countdown-box"><p style="font-family:'Bebas Neue',sans-serif;font-size:36px;color:#fff;" id="cDays">00</p><p class="text-white/60 text-xs uppercase tracking-wide">Days</p></div>
+      <div class="countdown-box"><p style="font-family:'Bebas Neue',sans-serif;font-size:36px;color:#fff;" id="cHours">00</p><p class="text-white/60 text-xs uppercase tracking-wide">Hours</p></div>
+      <div class="countdown-box"><p style="font-family:'Bebas Neue',sans-serif;font-size:36px;color:#fff;" id="cMins">00</p><p class="text-white/60 text-xs uppercase tracking-wide">Mins</p></div>
+      <div class="countdown-box"><p style="font-family:'Bebas Neue',sans-serif;font-size:36px;color:#e94560;" id="cSecs">00</p><p class="text-white/60 text-xs uppercase tracking-wide">Secs</p></div>
+    </div>
+    <a href="#products"><button class="btn-solid mt-10 text-base px-10 py-4">Grab the Deal <i class="fa-solid fa-fire ml-2"></i></button></a>
+  </div>
+</section>
+
+<!-- ===================== OUR STORY ===================== -->
+<section id="story" class="py-20 px-4">
+  <div class="max-w-7xl mx-auto grid md:grid-cols-2 gap-16 items-center">
+    <div class="fade-up">
+      <p class="text-accent font-semibold text-sm tracking-widest uppercase mb-3">Our Story</p>
+      <h2 style="font-family:'Bebas Neue',sans-serif;font-size:clamp(36px,5vw,56px);letter-spacing:2px;line-height:1.1;">Passion for Every Step</h2>
+      <p class="text-gray-600 mt-5 text-base leading-relaxed">SoleStride was born from a simple belief: everyone deserves footwear that feels as good as it looks. From the busy streets of Karachi to the cool hills of Murree, our shoes are built for real life — wherever yours takes you.</p>
+      <p class="text-gray-600 mt-4 text-base leading-relaxed">We partner with trusted manufacturers to bring you authentic, high-quality footwear for the entire family — at prices that make sense in Pakistan.</p>
+      <div class="grid grid-cols-3 gap-4 mt-8">
+        <div class="text-center p-4 rounded-xl bg-gray-50">
+          <i class="fa-solid fa-shoe-prints text-accent text-2xl mb-2"></i>
+          <p class="font-bold text-sm">500+ Styles</p>
+        </div>
+        <div class="text-center p-4 rounded-xl bg-gray-50">
+          <i class="fa-solid fa-leaf text-accent text-2xl mb-2"></i>
+          <p class="font-bold text-sm">Eco Packaging</p>
+        </div>
+        <div class="text-center p-4 rounded-xl bg-gray-50">
+          <i class="fa-solid fa-award text-accent text-2xl mb-2"></i>
+          <p class="font-bold text-sm">Award-Winning</p>
+        </div>
+      </div>
+    </div>
+    <div class="fade-up">
+      <div class="relative">
+        <img src="Premium Quality & Craftsmanship.jpg" alt="Our Story" class="rounded-2xl w-full h-96 object-cover" onerror="this.src='https://placehold.co/600x400/1a1a2e/fff?text=Our+Story'"/>
+        <div class="absolute -bottom-6 -left-6 bg-accent text-white rounded-2xl p-5 shadow-2xl">
+          <p style="font-family:'Bebas Neue',sans-serif;font-size:28px;">Since 2018</p>
+          <p class="text-sm opacity-80">Serving Pakistan</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== WHY CHOOSE US ===================== -->
+<section class="py-20 px-4 bg-white">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center mb-14 fade-up">
+      <p class="text-accent font-semibold text-sm tracking-widest uppercase mb-2">Why Us</p>
+      <h2 style="font-family:'Bebas Neue',sans-serif;font-size:clamp(36px,5vw,56px);letter-spacing:2px;">The SoleStride Difference</h2>
+    </div>
+    <div class="grid md:grid-cols-3 gap-8 fade-up">
+      <div class="text-center p-8 rounded-2xl border border-gray-100 hover:shadow-xl transition-shadow">
+        <div class="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-5">
+          <i class="fa-solid fa-people-group text-accent text-2xl"></i>
+        </div>
+        <p style="font-family:'Bebas Neue',sans-serif;font-size:42px;color:#e94560;">10K+</p>
+        <p class="font-bold text-lg mb-2">Happy Customers</p>
+        <p class="text-gray-500 text-sm leading-relaxed">Thousands of satisfied customers across Pakistan trust SoleStride for their footwear needs.</p>
+      </div>
+      <div class="text-center p-8 rounded-2xl border border-gray-100 hover:shadow-xl transition-shadow">
+        <div class="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-5">
+          <i class="fa-solid fa-shield-halved text-accent text-2xl"></i>
+        </div>
+        <p style="font-family:'Bebas Neue',sans-serif;font-size:42px;color:#e94560;">1-Year</p>
+        <p class="font-bold text-lg mb-2">Quality Guarantee</p>
+        <p class="text-gray-500 text-sm leading-relaxed">Every product comes with our quality promise. If it's not right, we'll fix it — no questions asked.</p>
+      </div>
+      <div class="text-center p-8 rounded-2xl border border-gray-100 hover:shadow-xl transition-shadow">
+        <div class="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-5">
+          <i class="fa-solid fa-truck-fast text-accent text-2xl"></i>
+        </div>
+        <p style="font-family:'Bebas Neue',sans-serif;font-size:42px;color:#e94560;">3-5</p>
+        <p class="font-bold text-lg mb-2">Days Delivery</p>
+        <p class="text-gray-500 text-sm leading-relaxed">Fast, reliable delivery to all major cities including Karachi, Lahore, Islamabad and more.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== PREMIUM QUALITY ===================== -->
+<section class="py-20 px-4" style="background:#f8f7f4;">
+  <div class="max-w-7xl mx-auto grid md:grid-cols-2 gap-16 items-center">
+    <div class="fade-up order-2 md:order-1">
+      <img src="Premium Quality & Craftsmanship.jpg" alt="Quality" class="rounded-2xl w-full h-80 object-cover shadow-2xl" onerror="this.src='https://placehold.co/600x400/1a1a2e/fff?text=Quality'"/>
+    </div>
+    <div class="fade-up order-1 md:order-2">
+      <p class="text-accent font-semibold text-sm tracking-widest uppercase mb-3">Premium Quality</p>
+      <h2 style="font-family:'Bebas Neue',sans-serif;font-size:clamp(32px,4vw,48px);letter-spacing:2px;line-height:1.1;">Built to Last, Made to Impress</h2>
+      <p class="text-gray-600 mt-4 leading-relaxed">Each pair of SoleStride shoes is carefully selected for durability, comfort, and style. We work only with manufacturers who meet our strict quality standards.</p>
+      <div class="mt-6 space-y-4">
+        <div class="flex gap-3 items-start">
+          <i class="fa-solid fa-circle-check text-accent mt-1"></i>
+          <div><p class="font-semibold">Premium Materials</p><p class="text-gray-500 text-sm">Genuine leather, breathable mesh, and durable rubber soles.</p></div>
+        </div>
+        <div class="flex gap-3 items-start">
+          <i class="fa-solid fa-circle-check text-accent mt-1"></i>
+          <div><p class="font-semibold">Ergonomic Comfort</p><p class="text-gray-500 text-sm">Cushioned insoles and arch support for all-day wear.</p></div>
+        </div>
+        <div class="flex gap-3 items-start">
+          <i class="fa-solid fa-circle-check text-accent mt-1"></i>
+          <div><p class="font-semibold">Rigorous Testing</p><p class="text-gray-500 text-sm">Every pair undergoes quality checks before it reaches you.</p></div>
+        </div>
+        <div class="flex gap-3 items-start">
+          <i class="fa-solid fa-circle-check text-accent mt-1"></i>
+          <div><p class="font-semibold">Sustainable Packaging</p><p class="text-gray-500 text-sm">Eco-friendly boxes and minimal waste packaging.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== GALLERY ===================== -->
+<section class="py-20 px-4 relative gallery-bg">
+  <div class="relative z-10 max-w-7xl mx-auto">
+    <div class="text-center mb-12 fade-up">
+      <p class="text-accent font-semibold text-sm tracking-widest uppercase mb-2">Gallery</p>
+      <h2 style="font-family:'Bebas Neue',sans-serif;font-size:clamp(36px,5vw,56px);letter-spacing:2px;color:#fff;">Style on the Street</h2>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 fade-up">
+      <div class="rounded-xl overflow-hidden group"><img src="gallery 1.jpg" alt="Gallery 1" class="w-full h-56 object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.src='https://placehold.co/400x280/e94560/fff?text=Style+1'"/></div>
+      <div class="rounded-xl overflow-hidden group mt-8"><img src="gallery 2.jpg" alt="Gallery 2" class="w-full h-56 object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.src='https://placehold.co/400x280/1a1a2e/fff?text=Style+2'"/></div>
+      <div class="rounded-xl overflow-hidden group"><img src="gallery 3.jpg" alt="Gallery 3" class="w-full h-56 object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.src='https://placehold.co/400x280/c9b99a/1a1a2e?text=Style+3'"/></div>
+      <div class="rounded-xl overflow-hidden group mt-8"><img src="gallery 4.jpg" alt="Gallery 4" class="w-full h-56 object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.src='https://placehold.co/400x280/e94560/fff?text=Style+4'"/></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== CUSTOM ORDER / BESPOKE ===================== -->
+<section class="py-20 px-4 bg-white">
+  <div class="max-w-7xl mx-auto text-center fade-up">
+    <p class="text-accent font-semibold text-sm tracking-widest uppercase mb-3">Custom Orders</p>
+    <h2 style="font-family:'Bebas Neue',sans-serif;font-size:clamp(36px,5vw,56px);letter-spacing:2px;">Can't Find Your Size?<br/>We've Got You.</h2>
+    <p class="text-gray-600 mt-4 max-w-xl mx-auto leading-relaxed">Order any product in a custom size, color, or style. Our team will source it just for you — with free consultation and zero hassle.</p>
+    <div class="grid md:grid-cols-3 gap-8 mt-12">
+      <div class="p-8 rounded-2xl bg-gray-50 hover:shadow-lg transition-shadow">
+        <div class="w-14 h-14 bg-accent/10 rounded-xl flex items-center justify-center mx-auto mb-4">
+          <i class="fa-solid fa-phone text-accent text-xl"></i>
+        </div>
+        <h3 class="font-bold text-base mb-2">Free Consultation</h3>
+        <p class="text-gray-500 text-sm">Call or WhatsApp us to discuss your exact requirements — no pressure, no fees.</p>
+      </div>
+      <div class="p-8 rounded-2xl bg-gray-50 hover:shadow-lg transition-shadow">
+        <div class="w-14 h-14 bg-accent/10 rounded-xl flex items-center justify-center mx-auto mb-4">
+          <i class="fa-solid fa-ruler text-accent text-xl"></i>
+        </div>
+        <h3 class="font-bold text-base mb-2">Size Customization</h3>
+        <p class="text-gray-500 text-sm">Hard-to-find sizes? Narrow or wide feet? We cater to every foot type across our full range.</p>
+      </div>
+      <div class="p-8 rounded-2xl bg-gray-50 hover:shadow-lg transition-shadow">
+        <div class="w-14 h-14 bg-accent/10 rounded-xl flex items-center justify-center mx-auto mb-4">
+          <i class="fa-solid fa-truck text-accent text-xl"></i>
+        </div>
+        <h3 class="font-bold text-base mb-2">Doorstep Delivery</h3>
+        <p class="text-gray-500 text-sm">Your custom order is delivered directly to your door anywhere in Pakistan within 7–10 days.</p>
+      </div>
+    </div>
+    <a href="https://wa.me/923140607452" target="_blank"><button class="btn-solid mt-10 text-base px-10 py-4"><i class="fa-brands fa-whatsapp mr-2"></i>WhatsApp for Custom Order</button></a>
+  </div>
+</section>
+
+<!-- ===================== REVIEWS ===================== -->
+<section id="reviews" class="py-20 px-4" style="background:#f8f7f4;">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center mb-14 fade-up">
+      <p class="text-accent font-semibold text-sm tracking-widest uppercase mb-2">Customer Love</p>
+      <h2 style="font-family:'Bebas Neue',sans-serif;font-size:clamp(36px,5vw,56px);letter-spacing:2px;">What Our Customers Say</h2>
+    </div>
+    <div class="grid md:grid-cols-3 gap-8 fade-up">
+      <div class="bg-white p-8 rounded-2xl shadow-sm hover:shadow-xl transition-shadow">
+        <div class="flex text-amber-400 text-sm mb-4">★★★★★</div>
+        <p class="text-gray-700 leading-relaxed italic">"I ordered Nike Air Max for my husband and the quality is absolutely amazing. Delivered in just 3 days to Karachi. Will definitely order again!"</p>
+        <div class="flex items-center gap-3 mt-6">
+          <div class="w-10 h-10 rounded-full bg-accent flex items-center justify-center text-white font-bold text-sm">FZ</div>
+          <div><p class="font-semibold text-sm">Fatima Zahra</p><p class="text-gray-400 text-xs">Karachi</p></div>
+        </div>
+      </div>
+      <div class="bg-white p-8 rounded-2xl shadow-sm hover:shadow-xl transition-shadow">
+        <div class="flex text-amber-400 text-sm mb-4">★★★★★</div>
+        <p class="text-gray-700 leading-relaxed italic">"Best shoes store in Pakistan! Got kids' shoes for my three children and the fit was perfect. The return process was also super easy."</p>
+        <div class="flex items-center gap-3 mt-6">
+          <div class="w-10 h-10 rounded-full bg-brand flex items-center justify-center text-white font-bold text-sm">AK</div>
+          <div><p class="font-semibold text-sm">Ahmed Khan</p><p class="text-gray-400 text-xs">Lahore</p></div>
+        </div>
+      </div>
+      <div class="bg-white p-8 rounded-2xl shadow-sm hover:shadow-xl transition-shadow">
+        <div class="flex text-amber-400 text-sm mb-4">★★★★★</div>
+        <p class="text-gray-700 leading-relaxed italic">"The women's heels I ordered are stunning — exactly as shown in the pictures. Packaging was beautiful and delivery was on time. 10/10!"</p>
+        <div class="flex items-center gap-3 mt-6">
+          <div class="w-10 h-10 rounded-full" style="background:#c9b99a;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:bold;font-size:14px;">SM</div>
+          <div><p class="font-semibold text-sm">Sara Malik</p><p class="text-gray-400 text-xs">Islamabad</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== SOCIAL PROOF ===================== -->
+<section class="py-20 px-4 bg-white">
+  <div class="max-w-7xl mx-auto text-center fade-up">
+    <p class="text-accent font-semibold text-sm tracking-widest uppercase mb-3">Follow Us</p>
+    <h2 style="font-family:'Bebas Neue',sans-serif;font-size:clamp(32px,5vw,52px);letter-spacing:2px;">@SoleStride on Instagram</h2>
+    <p class="text-gray-500 mt-3 mb-10">Tag us in your photos for a chance to be featured!</p>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="rounded-xl overflow-hidden group relative cursor-pointer">
+        <img src="product 2.jpg" alt="Insta 1" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-400" onerror="this.src='https://placehold.co/300x240/1a1a2e/fff?text=Post+1'"/>
+        <div class="absolute inset-0 bg-accent/0 group-hover:bg-accent/30 transition-all flex items-center justify-center"><i class="fa-brands fa-instagram text-white text-3xl opacity-0 group-hover:opacity-100 transition-opacity"></i></div>
+      </div>
+      <div class="rounded-xl overflow-hidden group relative cursor-pointer">
+        <img src="product 5.jpg" alt="Insta 2" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-400" onerror="this.src='https://placehold.co/300x240/e94560/fff?text=Post+2'"/>
+        <div class="absolute inset-0 bg-accent/0 group-hover:bg-accent/30 transition-all flex items-center justify-center"><i class="fa-brands fa-instagram text-white text-3xl opacity-0 group-hover:opacity-100 transition-opacity"></i></div>
+      </div>
+      <div class="rounded-xl overflow-hidden group relative cursor-pointer">
+        <img src="product 8.jpg" alt="Insta 3" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-400" onerror="this.src='https://placehold.co/300x240/c9b99a/1a1a2e?text=Post+3'"/>
+        <div class="absolute inset-0 bg-accent/0 group-hover:bg-accent/30 transition-all flex items-center justify-center"><i class="fa-brands fa-instagram text-white text-3xl opacity-0 group-hover:opacity-100 transition-opacity"></i></div>
+      </div>
+      <div class="rounded-xl overflow-hidden group relative cursor-pointer">
+        <img src="product 10.jpg" alt="Insta 4" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-400" onerror="this.src='https://placehold.co/300x240/1a1a2e/fff?text=Post+4'"/>
+        <div class="absolute inset-0 bg-accent/0 group-hover:bg-accent/30 transition-all flex items-center justify-center"><i class="fa-brands fa-instagram text-white text-3xl opacity-0 group-hover:opacity-100 transition-opacity"></i></div>
+      </div>
+    </div>
+    <a href="#" target="_blank"><button class="btn-outline mt-8 text-base px-8 py-3"><i class="fa-brands fa-instagram mr-2"></i>Follow @SoleStride</button></a>
+  </div>
+</section>
+
+<!-- ===================== FAQ ===================== -->
+<section id="faq" class="py-20 px-4" style="background:#f8f7f4;">
+  <div class="max-w-3xl mx-auto">
+    <div class="text-center mb-12 fade-up">
+      <p class="text-accent font-semibold text-sm tracking-widest uppercase mb-2">FAQs</p>
+      <h2 style="font-family:'Bebas Neue',sans-serif;font-size:clamp(36px,5vw,56px);letter-spacing:2px;">Got Questions?</h2>
+    </div>
+    <div class="space-y-4 fade-up" id="faqContainer">
+      <div class="faq-item bg-white rounded-xl overflow-hidden">
+        <button class="w-full flex justify-between items-center p-5 text-left font-semibold text-base" onclick="toggleFaq(this)">
+          How do I know which size to order?
+          <i class="fa-solid fa-chevron-down text-accent faq-chevron"></i>
+        </button>
+        <div class="faq-answer px-5 pb-5 text-gray-600 text-sm leading-relaxed">
+          We have a detailed size guide on each product page. We recommend measuring your foot length in cm and comparing it to our chart. If you're between sizes, go up. You can also WhatsApp us and we'll help you choose the right fit.
+        </div>
+      </div>
+      <div class="faq-item bg-white rounded-xl overflow-hidden">
+        <button class="w-full flex justify-between items-center p-5 text-left font-semibold text-base" onclick="toggleFaq(this)">
+          Do you offer Cash on Delivery (COD)?
+          <i class="fa-solid fa-chevron-down text-accent faq-chevron"></i>
+        </button>
+        <div class="faq-answer px-5 pb-5 text-gray-600 text-sm leading-relaxed">
+          Yes! We offer COD across all major cities in Pakistan including Karachi, Lahore, Islamabad, Rawalpindi, Peshawar, Quetta, Multan, and Faisalabad. Payment is collected at the time of delivery.
+        </div>
+      </div>
+      <div class="faq-item bg-white rounded-xl overflow-hidden">
+        <button class="w-full flex justify-between items-center p-5 text-left font-semibold text-base" onclick="toggleFaq(this)">
+          What is your return and exchange policy?
+          <i class="fa-solid fa-chevron-down text-accent faq-chevron"></i>
+        </button>
+        <div class="faq-answer px-5 pb-5 text-gray-600 text-sm leading-relaxed">
+          We offer a 30-day return and exchange policy. If the product is defective, wrong size, or not as described, we will replace it or give you a full refund. Just WhatsApp us with photos of the issue and we'll take care of the rest.
+        </div>
+      </div>
+      <div class="faq-item bg-white rounded-xl overflow-hidden">
+        <button class="w-full flex justify-between items-center p-5 text-left font-semibold text-base" onclick="toggleFaq(this)">
+          How long does delivery take?
+          <i class="fa-solid fa-chevron-down text-accent faq-chevron"></i>
+        </button>
+        <div class="faq-answer px-5 pb-5 text-gray-600 text-sm leading-relaxed">
+          Standard delivery takes 3–5 business days. Same-day dispatch is available if you order before 2 PM. Express delivery (1–2 days) is available in Karachi, Lahore, and Islamabad for an additional fee.
+        </div>
+      </div>
+      <div class="faq-item bg-white rounded-xl overflow-hidden">
+        <button class="w-full flex justify-between items-center p-5 text-left font-semibold text-base" onclick="toggleFaq(this)">
+          Are your products 100% original?
+          <i class="fa-solid fa-chevron-down text-accent faq-chevron"></i>
+        </button>
+        <div class="faq-answer px-5 pb-5 text-gray-600 text-sm leading-relaxed">
+          Absolutely. We source our products directly from authorized distributors and verified manufacturers. Every product comes with original packaging and brand tags. We offer a quality guarantee on all items.
+        </div>
+      </div>
+      <div class="faq-item bg-white rounded-xl overflow-hidden">
+        <button class="w-full flex justify-between items-center p-5 text-left font-semibold text-base" onclick="toggleFaq(this)">
+          Can I track my order?
+          <i class="fa-solid fa-chevron-down text-accent faq-chevron"></i>
+        </button>
+        <div class="faq-answer px-5 pb-5 text-gray-600 text-sm leading-relaxed">
+          Yes! Once your order is dispatched, you will receive a tracking number via WhatsApp or SMS. You can use this to track your package in real-time on the courier's website.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== FINAL CTA ===================== -->
+<section class="py-24 px-4 text-center" style="background:linear-gradient(135deg,#1a1a2e 0%,#16213e 60%,#0f3460 100%);">
+  <div class="max-w-3xl mx-auto fade-up">
+    <p class="text-accent font-semibold text-sm tracking-widest uppercase mb-4">Ready to Step Up?</p>
+    <h2 style="font-family:'Bebas Neue',sans-serif;font-size:clamp(48px,7vw,88px);color:#fff;letter-spacing:2px;line-height:0.95;">Your Next<br/>Favourite Pair<br/><span style="color:#e94560;">Awaits.</span></h2>
+    <p class="text-white/70 mt-6 text-base leading-relaxed max-w-lg mx-auto">Shop the latest collection for Men, Women & Kids. Free delivery. COD available. 30-day returns. No excuses.</p>
+    <div class="flex gap-4 justify-center mt-10 flex-wrap">
+      <a href="#products"><button class="btn-solid text-base px-10 py-4">Shop Now <i class="fa-solid fa-arrow-right ml-2"></i></button></a>
+      <a href="https://wa.me/923140607452" target="_blank"><button class="btn-outline text-base px-10 py-4" style="color:#fff;border-color:rgba(255,255,255,0.4);"><i class="fa-brands fa-whatsapp mr-2"></i>WhatsApp Order</button></a>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== FOOTER ===================== -->
+<footer style="background:#0f0f1a;" class="pt-16 pb-8 px-4">
+  <div class="max-w-7xl mx-auto">
+    <div class="grid md:grid-cols-4 gap-12 mb-12">
+      <div class="md:col-span-1">
+        <div class="flex items-center gap-3 mb-4">
+          <img src="logo.png" alt="SoleStride" class="h-10 w-10 object-contain rounded-lg" onerror="this.style.display='none'"/>
+          <span style="font-family:'Bebas Neue',sans-serif;font-size:26px;color:#fff;letter-spacing:2px;">Sole<span style="color:#e94560;">Stride</span></span>
+        </div>
+        <p class="text-white/50 text-sm leading-relaxed">Walk in style with Pakistan's most loved footwear brand. Premium shoes for Men, Women & Kids — delivered to your door.</p>
+        <div class="flex gap-4 mt-6">
+          <a href="#" class="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white/60 hover:bg-accent hover:text-white transition"><i class="fa-brands fa-facebook-f text-sm"></i></a>
+          <a href="#" class="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white/60 hover:bg-accent hover:text-white transition"><i class="fa-brands fa-instagram text-sm"></i></a>
+          <a href="#" class="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white/60 hover:bg-accent hover:text-white transition"><i class="fa-brands fa-tiktok text-sm"></i></a>
+          <a href="https://wa.me/923140607452" class="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white/60 hover:bg-accent hover:text-white transition"><i class="fa-brands fa-whatsapp text-sm"></i></a>
+        </div>
+      </div>
+      <div>
+        <p class="text-white font-semibold mb-5 text-sm uppercase tracking-wide">Quick Links</p>
+        <div class="space-y-3">
+          <a href="#products" class="block text-white/50 hover:text-accent text-sm transition">Shop All</a>
+          <a href="#categories" class="block text-white/50 hover:text-accent text-sm transition">Men's Shoes</a>
+          <a href="#categories" class="block text-white/50 hover:text-accent text-sm transition">Women's Shoes</a>
+          <a href="#categories" class="block text-white/50 hover:text-accent text-sm transition">Kids' Shoes</a>
+          <a href="#story" class="block text-white/50 hover:text-accent text-sm transition">Our Story</a>
+          <a href="#faq" class="block text-white/50 hover:text-accent text-sm transition">FAQ</a>
+        </div>
+      </div>
+      <div>
+        <p class="text-white font-semibold mb-5 text-sm uppercase tracking-wide">Help & Support</p>
+        <div class="space-y-3">
+          <a href="#" class="block text-white/50 hover:text-accent text-sm transition">Size Guide</a>
+          <a href="#" class="block text-white/50 hover:text-accent text-sm transition">Track My Order</a>
+          <a href="#" class="block text-white/50 hover:text-accent text-sm transition">Returns & Exchange</a>
+          <a href="#" class="block text-white/50 hover:text-accent text-sm transition">Shipping Info</a>
+          <a href="#" class="block text-white/50 hover:text-accent text-sm transition">Privacy Policy</a>
+          <a href="#" class="block text-white/50 hover:text-accent text-sm transition">Terms & Conditions</a>
+        </div>
+      </div>
+      <div>
+        <p class="text-white font-semibold mb-5 text-sm uppercase tracking-wide">Contact Us</p>
+        <div class="space-y-4">
+          <div class="flex gap-3 items-start">
+            <i class="fa-solid fa-location-dot text-accent mt-0.5 text-sm"></i>
+            <p class="text-white/50 text-sm">Shop #12, Tariq Road, Karachi, Pakistan</p>
+          </div>
+          <div class="flex gap-3 items-center">
+            <i class="fa-solid fa-phone text-accent text-sm"></i>
+            <a href="tel:+923140607452" class="text-white/50 hover:text-accent text-sm transition">+92 314 0607452</a>
+          </div>
+          <div class="flex gap-3 items-center">
+            <i class="fa-brands fa-whatsapp text-accent text-sm"></i>
+            <a href="https://wa.me/923140607452" class="text-white/50 hover:text-accent text-sm transition">WhatsApp Order</a>
+          </div>
+          <div class="flex gap-3 items-center">
+            <i class="fa-solid fa-envelope text-accent text-sm"></i>
+            <a href="mailto:hello@solestride.pk" class="text-white/50 hover:text-accent text-sm transition">hello@solestride.pk</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="border-t border-white/10 pt-6 flex flex-col md:flex-row justify-between items-center gap-4">
+      <p class="text-white/30 text-sm">© 2025 SoleStride. All rights reserved. Made with ❤️ in Pakistan.</p>
+      <div class="flex gap-3">
+        <img src="https://placehold.co/40x24/ffffff/333333?text=VISA" alt="Visa" class="h-6 rounded opacity-60"/>
+        <img src="https://placehold.co/40x24/ffffff/333333?text=MC" alt="Mastercard" class="h-6 rounded opacity-60"/>
+        <img src="https://placehold.co/40x24/ffffff/333333?text=JCB" alt="JCB" class="h-6 rounded opacity-60"/>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ===================== CART SIDEBAR ===================== -->
+<div id="cartOverlay" onclick="closeCart()"></div>
+<div id="cartSidebar">
+  <div class="flex items-center justify-between p-5 border-b">
+    <h3 style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;">Your Cart <span id="cartCount" class="text-accent">(0)</span></h3>
+    <button onclick="closeCart()" class="text-gray-400 hover:text-gray-700 text-xl"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div id="cartItems" class="p-5 flex-1 space-y-4"></div>
+  <div class="p-5 border-t">
+    <div class="flex justify-between items-center mb-4">
+      <span class="font-semibold">Total:</span>
+      <span class="font-bold text-xl" id="cartTotal">PKR 0</span>
+    </div>
+    <button class="btn-solid w-full py-3 text-base" onclick="openOrderModal()">Proceed to Checkout <i class="fa-solid fa-arrow-right ml-2"></i></button>
+  </div>
+</div>
+
+<!-- ===================== PRODUCT MODAL ===================== -->
+<div id="productModal" class="modal-overlay" onclick="closeProductModal(event)">
+  <div class="modal-box p-6 md:p-8" onclick="event.stopPropagation()">
+    <div class="flex justify-end mb-2">
+      <button onclick="closeProductModal()" class="text-gray-400 hover:text-gray-700 text-xl"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="grid md:grid-cols-2 gap-8">
+      <div>
+        <div class="rounded-xl overflow-hidden mb-4 bg-gray-50">
+          <img id="modalMainImg" src="" alt="" class="w-full h-72 object-cover"/>
+        </div>
+        <div class="flex gap-2" id="modalThumbs"></div>
+      </div>
+      <div>
+        <p id="modalCategory" class="text-accent text-xs font-semibold uppercase tracking-widest mb-2"></p>
+        <h3 id="modalTitle" class="font-bold text-2xl mb-1" style="font-family:'Bebas Neue',sans-serif;letter-spacing:1px;"></h3>
+        <p id="modalPrice" class="text-accent text-xl font-bold mb-3"></p>
+        <p id="modalDesc" class="text-gray-600 text-sm leading-relaxed mb-5"></p>
+        <p class="font-semibold text-sm mb-2">Select Size:</p>
+        <div class="flex gap-2 flex-wrap mb-5" id="modalSizes">
+          <button class="size-btn" onclick="selectSize(this)">38</button>
+          <button class="size-btn" onclick="selectSize(this)">39</button>
+          <button class="size-btn" onclick="selectSize(this)">40</button>
+          <button class="size-btn" onclick="selectSize(this)">41</button>
+          <button class="size-btn" onclick="selectSize(this)">42</button>
+          <button class="size-btn" onclick="selectSize(this)">43</button>
+          <button class="size-btn" onclick="selectSize(this)">44</button>
+        </div>
+        <div class="flex items-center gap-4 mb-6">
+          <p class="font-semibold text-sm">Quantity:</p>
+          <div class="flex items-center border border-gray-200 rounded-lg">
+            <button onclick="changeQty(-1)" class="w-9 h-9 flex items-center justify-center text-accent font-bold hover:bg-gray-50 transition">−</button>
+            <span id="modalQty" class="w-10 text-center font-semibold text-sm">1</span>
+            <button onclick="changeQty(1)" class="w-9 h-9 flex items-center justify-center text-accent font-bold hover:bg-gray-50 transition">+</button>
+          </div>
+        </div>
+        <div class="flex gap-3">
+          <button class="btn-outline flex-1 py-3" onclick="addToCartFromModal()">Add to Cart</button>
+          <button class="btn-solid flex-1 py-3" onclick="buyNow()">Buy Now</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== ORDER MODAL ===================== -->
+<div id="orderModal" class="modal-overlay" onclick="closeOrderModal(event)">
+  <div class="modal-box p-6 md:p-8 max-w-lg" onclick="event.stopPropagation()">
+    <div class="flex items-center justify-between mb-6">
+      <h3 style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;">Complete Your Order</h3>
+      <button onclick="closeOrderModal()" class="text-gray-400 hover:text-gray-700 text-xl"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="space-y-4">
+      <div class="grid grid-cols-2 gap-4">
+        <div><label class="block text-sm font-medium mb-1">First Name *</label><input id="oFName" type="text" placeholder="Ali" class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-accent"/></div>
+        <div><label class="block text-sm font-medium mb-1">Last Name *</label><input id="oLName" type="text" placeholder="Khan" class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-accent"/></div>
+      </div>
+      <div><label class="block text-sm font-medium mb-1">Delivery Address *</label><textarea id="oAddress" rows="2" placeholder="House #, Street, Area, City" class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-accent resize-none"></textarea></div>
+      <div><label class="block text-sm font-medium mb-1">WhatsApp Number *</label><input id="oPhone" type="tel" placeholder="+92 3XX XXXXXXX" class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-accent"/></div>
+      <div><label class="block text-sm font-medium mb-1">Order Notes (optional)</label><textarea id="oNotes" rows="2" placeholder="Any specific size, color, or delivery instructions..." class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-accent resize-none"></textarea></div>
+    </div>
+    <div class="mt-6 p-4 bg-gray-50 rounded-xl">
+      <p class="text-sm font-semibold mb-1">Order Summary</p>
+      <div id="orderSummary" class="text-sm text-gray-600 space-y-1"></div>
+      <div class="border-t mt-3 pt-3 flex justify-between font-bold"><span>Total:</span><span id="orderTotal" class="text-accent"></span></div>
+    </div>
+    <button onclick="submitOrder()" class="btn-solid w-full py-3 mt-5 text-base"><i class="fa-brands fa-whatsapp mr-2 text-lg"></i>Confirm Order on WhatsApp</button>
+  </div>
+</div>
+
+<!-- ===================== JS ===================== -->
+<script>
+// ---- PRODUCTS DATA ----
+const products = [
+  { id:1, name:"Men's Running Sneakers", price:4500, desc:"Lightweight foam cushioning, breathable mesh upper, non-slip rubber sole. Perfect for daily runs and gym sessions.", cat:"Men", img:"product 1.jpg" },
+  { id:2, name:"Men's Leather Loafers", price:5800, desc:"Premium genuine leather upper with cushioned footbed. Slip-on style with metal accent. Office to evening wear.", cat:"Men", img:"product 2.jpg" },
+  { id:3, name:"Men's High-Top Boots", price:6500, desc:"Durable ankle-length boots with side zip. Waterproof finish, Vibram outsole. Built for any weather.", cat:"Men", img:"product 3.jpg" },
+  { id:4, name:"Women's Stiletto Heels", price:4800, desc:"Elegant 4-inch stiletto with suede finish. Padded insole, non-slip base. Perfect for formal events.", cat:"Women", img:"product 4.jpg" },
+  { id:5, name:"Women's Ballet Flats", price:3200, desc:"Soft leather ballet flat with ribbon tie. Ultra-comfortable foam lining. For casual and office wear.", cat:"Women", img:"product 5.jpg" },
+  { id:6, name:"Women's Wedge Sandals", price:3800, desc:"Platform wedge sandal with adjustable ankle strap. 3-inch heel, non-slip sole. Summer essential.", cat:"Women", img:"product 6.jpg" },
+  { id:7, name:"Kids' Sports Shoes", price:2500, desc:"Velcro closure for easy on/off. Breathable mesh, extra toe protection. Sizes 28–35.", cat:"Kids", img:"product 7.jpg" },
+  { id:8, name:"Kids' School Shoes", price:2200, desc:"Classic black leather school shoe. Durable sole, cushioned insole. Available in all school sizes.", cat:"Kids", img:"product 8.jpg" },
+  { id:9, name:"Kids' Rain Boots", price:1800, desc:"Waterproof rubber boots with cartoon print lining. Easy pull-on handles. Keeps little feet dry!", cat:"Kids", img:"product 9.jpg" },
+  { id:10, name:"Women's Block Heel Mules", price:4200, desc:"Trendy block heel mule in faux suede. Open-toe design, cushioned insole. Day to night versatile.", cat:"Women", img:"product 10.jpg" },
+];
+
+let cart = JSON.parse(localStorage.getItem('solestride_cart') || '[]');
+let currentProduct = null;
+let modalQty = 1;
+let selectedSize = null;
+
+// ---- RENDER PRODUCTS ----
+function renderProducts(filter='All'){
+  const grid = document.getElementById('productGrid');
+  const filtered = filter==='All' ? products : products.filter(p=>p.cat===filter);
+  grid.innerHTML = filtered.map(p=>`
+    <div class="product-card fade-up" onclick="openProductModal(${p.id})">
+      <div class="card-img"><img src="${p.img}" alt="${p.name}" class="w-full" style="height:260px;object-fit:cover;" onerror="this.src='https://placehold.co/400x260/1a1a2e/fff?text=${encodeURIComponent(p.name)}'"/></div>
+      <div class="p-5">
+        <p class="text-xs text-accent font-semibold uppercase tracking-wide mb-1">${p.cat}</p>
+        <h3 class="font-bold text-base mb-1">${p.name}</h3>
+        <p class="text-gray-500 text-xs mb-3 line-clamp-2">${p.desc}</p>
+        <div class="flex items-center justify-between">
+          <p class="font-bold text-accent text-lg">PKR ${p.price.toLocaleString()}</p>
+          <button class="btn-outline text-xs px-4 py-2" onclick="event.stopPropagation();quickAdd(${p.id})"><i class="fa-solid fa-bag-shopping mr-1"></i>Add</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+  observeFadeUp();
+}
+
+function filterCategory(cat){
+  renderProducts(cat);
+  document.querySelectorAll('.filter-pill').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.filter-pill').forEach(b=>{ if(b.textContent===cat||(cat==='All'&&b.textContent==='All')) b.classList.add('active'); });
+  document.getElementById('products').scrollIntoView({behavior:'smooth'});
+}
+
+// ---- QUICK ADD ----
+function quickAdd(id){
+  const p = products.find(x=>x.id===id);
+  addToCart(p, 1, '—');
+  showToast(`${p.name} added to cart!`);
+}
+
+// ---- CART ----
+function addToCart(product, qty, size){
+  const key = `${product.id}_${size}`;
+  const existing = cart.find(i=>i.key===key);
+  if(existing) existing.qty += qty;
+  else cart.push({ key, id:product.id, name:product.name, price:product.price, img:product.img, qty, size });
+  saveCart(); updateCartBadge(); renderCartItems();
+}
+
+function saveCart(){ localStorage.setItem('solestride_cart', JSON.stringify(cart)); }
+
+function updateCartBadge(){
+  const total = cart.reduce((s,i)=>s+i.qty,0);
+  const badge = document.getElementById('cartBadge');
+  badge.textContent = total;
+  badge.classList.toggle('hidden', total===0);
+  document.getElementById('cartCount').textContent = `(${total})`;
+}
+
+function renderCartItems(){
+  const container = document.getElementById('cartItems');
+  if(!cart.length){ container.innerHTML='<p class="text-center text-gray-400 py-10 text-sm">Your cart is empty</p>'; document.getElementById('cartTotal').textContent='PKR 0'; return; }
+  container.innerHTML = cart.map(item=>`
+    <div class="flex gap-3 items-center">
+      <img src="${item.img}" class="w-16 h-16 object-cover rounded-lg" onerror="this.src='https://placehold.co/64x64/1a1a2e/fff?text=Shoe'"/>
+      <div class="flex-1 min-w-0">
+        <p class="font-semibold text-sm truncate">${item.name}</p>
+        <p class="text-xs text-gray-400">Size: ${item.size}</p>
+        <p class="text-accent text-sm font-bold">PKR ${(item.price*item.qty).toLocaleString()}</p>
+      </div>
+      <div class="flex items-center gap-1">
+        <button onclick="changeCartQty('${item.key}',-1)" class="w-7 h-7 rounded border text-accent font-bold text-sm flex items-center justify-center hover:bg-gray-50">−</button>
+        <span class="w-6 text-center text-sm">${item.qty}</span>
+        <button onclick="changeCartQty('${item.key}',1)" class="w-7 h-7 rounded border text-accent font-bold text-sm flex items-center justify-center hover:bg-gray-50">+</button>
+        <button onclick="removeCartItem('${item.key}')" class="w-7 h-7 rounded border text-red-400 text-sm flex items-center justify-center ml-1 hover:bg-red-50"><i class="fa-solid fa-trash text-xs"></i></button>
+      </div>
+    </div>
+  `).join('');
+  const total = cart.reduce((s,i)=>s+(i.price*i.qty),0);
+  document.getElementById('cartTotal').textContent = `PKR ${total.toLocaleString()}`;
+}
+
+function changeCartQty(key, delta){
+  const item = cart.find(i=>i.key===key);
+  if(!item) return;
+  item.qty += delta;
+  if(item.qty<=0) cart = cart.filter(i=>i.key!==key);
+  saveCart(); updateCartBadge(); renderCartItems();
+}
+function removeCartItem(key){ cart = cart.filter(i=>i.key!==key); saveCart(); updateCartBadge(); renderCartItems(); }
+function openCart(){ document.getElementById('cartSidebar').classList.add('open'); document.getElementById('cartOverlay').classList.add('open'); renderCartItems(); }
+function closeCart(){ document.getElementById('cartSidebar').classList.remove('open'); document.getElementById('cartOverlay').classList.remove('open'); }
+
+// ---- PRODUCT MODAL ----
+function openProductModal(id){
+  currentProduct = products.find(p=>p.id===id);
+  modalQty = 1; selectedSize = null;
+  document.getElementById('modalTitle').textContent = currentProduct.name;
+  document.getElementById('modalPrice').textContent = `PKR ${currentProduct.price.toLocaleString()}`;
+  document.getElementById('modalDesc').textContent = currentProduct.desc;
+  document.getElementById('modalCategory').textContent = currentProduct.cat;
+  document.getElementById('modalQty').textContent = 1;
+  document.getElementById('modalMainImg').src = currentProduct.img;
+  document.getElementById('modalMainImg').onerror = function(){ this.src=`https://placehold.co/400x300/1a1a2e/fff?text=${encodeURIComponent(currentProduct.name)}`; };
+  const thumbs = document.getElementById('modalThumbs');
+  thumbs.innerHTML = Array(5).fill(0).map((_,i)=>`<div class="thumb${i===0?' active':''}" onclick="switchThumb(this,'${currentProduct.img}')"><img src="${currentProduct.img}" onerror="this.src='https://placehold.co/60x60/1a1a2e/fff?text=${i+1}'"/></div>`).join('');
+  document.querySelectorAll('.size-btn').forEach(b=>b.classList.remove('selected'));
+  document.getElementById('productModal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function closeProductModal(e){
+  if(!e||e.target===document.getElementById('productModal')||!e.target){
+    document.getElementById('productModal').classList.remove('open');
+    document.body.style.overflow='';
+  }
+}
+
+function switchThumb(el, src){
+  document.querySelectorAll('.thumb').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('modalMainImg').src=src;
+}
+
+function changeQty(d){ modalQty=Math.max(1,modalQty+d); document.getElementById('modalQty').textContent=modalQty; }
+function selectSize(btn){ document.querySelectorAll('.size-btn').forEach(b=>b.classList.remove('selected')); btn.classList.add('selected'); selectedSize=btn.textContent; }
+
+function addToCartFromModal(){
+  if(!currentProduct) return;
+  addToCart(currentProduct, modalQty, selectedSize||'—');
+  showToast(`${currentProduct.name} added to cart!`);
+  closeProductModal();
+}
+
+function buyNow(){
+  if(!currentProduct) return;
+  addToCart(currentProduct, modalQty, selectedSize||'—');
+  closeProductModal();
+  openCart();
+}
+
+// ---- ORDER MODAL ----
+function openOrderModal(){
+  if(!cart.length) return;
+  const summary = document.getElementById('orderSummary');
+  summary.innerHTML = cart.map(i=>`<div class="flex justify-between"><span>${i.name} × ${i.qty} (Size: ${i.size})</span><span>PKR ${(i.price*i.qty).toLocaleString()}</span></div>`).join('');
+  const total = cart.reduce((s,i)=>s+(i.price*i.qty),0);
+  document.getElementById('orderTotal').textContent = `PKR ${total.toLocaleString()}`;
+  closeCart();
+  document.getElementById('orderModal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeOrderModal(e){
+  if(!e||e.target===document.getElementById('orderModal')||!e.target){
+    document.getElementById('orderModal').classList.remove('open');
+    document.body.style.overflow='';
+  }
+}
+
+function submitOrder(){
+  const fn=document.getElementById('oFName').value.trim();
+  const ln=document.getElementById('oLName').value.trim();
+  const addr=document.getElementById('oAddress').value.trim();
+  const phone=document.getElementById('oPhone').value.trim();
+  const notes=document.getElementById('oNotes').value.trim();
+  if(!fn||!ln||!addr||!phone){ alert('Please fill in all required fields.'); return; }
+  const total=cart.reduce((s,i)=>s+(i.price*i.qty),0);
+  let msg=`🛒 *New Order — SoleStride*\n\n`;
+  msg+=`👤 *Customer:* ${fn} ${ln}\n`;
+  msg+=`📍 *Address:* ${addr}\n`;
+  msg+=`📱 *WhatsApp:* ${phone}\n\n`;
+  msg+=`*Order Items:*\n`;
+  cart.forEach(i=>{ msg+=`• ${i.name} (Size: ${i.size}) × ${i.qty} — PKR ${(i.price*i.qty).toLocaleString()}\n`; });
+  msg+=`\n💰 *Total: PKR ${total.toLocaleString()}*\n`;
+  msg+=`💵 *Payment: Cash on Delivery (COD)*\n`;
+  if(notes) msg+=`📝 *Notes:* ${notes}`;
+  const url=`https://wa.me/923140607452?text=${encodeURIComponent(msg)}`;
+  window.open(url,'_blank');
+  cart=[]; saveCart(); updateCartBadge(); renderCartItems();
+  closeOrderModal();
+  document.getElementById('oFName').value='';
+  document.getElementById('oLName').value='';
+  document.getElementById('oAddress').value='';
+  document.getElementById('oPhone').value='';
+  document.getElementById('oNotes').value='';
+  showToast('Order sent on WhatsApp!');
+}
+
+// ---- TOAST ----
+function showToast(msg='Added to cart!'){
+  const t=document.getElementById('toast');
+  document.getElementById('toastMsg').textContent=msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+// ---- FAQ ----
+function toggleFaq(btn){
+  const answer=btn.nextElementSibling;
+  const icon=btn.querySelector('.faq-chevron');
+  const isOpen=answer.classList.contains('open');
+  document.querySelectorAll('.faq-answer').forEach(a=>a.classList.remove('open'));
+  document.querySelectorAll('.faq-chevron').forEach(c=>c.classList.remove('rotated'));
+  if(!isOpen){ answer.classList.add('open'); icon.classList.add('rotated'); }
+}
+
+// ---- COUNTDOWN ----
+function startCountdown(){
+  const end=new Date(); end.setDate(end.getDate()+3);
+  function tick(){
+    const diff=end-new Date();
+    if(diff<=0) return;
+    document.getElementById('cDays').textContent=String(Math.floor(diff/86400000)).padStart(2,'0');
+    document.getElementById('cHours').textContent=String(Math.floor((diff%86400000)/3600000)).padStart(2,'0');
+    document.getElementById('cMins').textContent=String(Math.floor((diff%3600000)/60000)).padStart(2,'0');
+    document.getElementById('cSecs').textContent=String(Math.floor((diff%60000)/1000)).padStart(2,'0');
+  }
+  tick(); setInterval(tick,1000);
+}
+
+// ---- FADE UP OBSERVER ----
+function observeFadeUp(){
+  const els=document.querySelectorAll('.fade-up:not(.visible)');
+  const obs=new IntersectionObserver(entries=>{ entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('visible'); obs.unobserve(e.target); } }); },{threshold:0.12});
+  els.forEach(el=>obs.observe(el));
+}
+
+// ---- INIT ----
+renderProducts();
+updateCartBadge();
+startCountdown();
+observeFadeUp();
+</script>
+</body>
+</html>
