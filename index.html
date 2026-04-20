@@ -121,8 +121,7 @@ tailwind.config = {
 <!-- ===================== HEADER ===================== -->
 <header id="mainHeader">
   <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-    <a href="#hero" class="flex items-center gap-3">
-      <img src="logo.png" alt="SoleStride" class="h-10 w-10 object-contain rounded-lg" onerror="this.style.display='none'"/>
+    <a href="" class="flex items-center gap-3">
       <span style="font-family:'Bebas Neue',sans-serif; font-size:28px; color:#fff; letter-spacing:2px;">Sole<span style="color:#e94560;">Stride</span></span>
     </a>
     <nav class="hidden md:flex items-center gap-8">
@@ -417,7 +416,7 @@ tailwind.config = {
         <p class="text-gray-500 text-sm">Your custom order is delivered directly to your door anywhere in Pakistan within 7–10 days.</p>
       </div>
     </div>
-    <a href="https://wa.me/923140607452" target="_blank"><button class="btn-solid mt-10 text-base px-10 py-4"><i class="fa-brands fa-whatsapp mr-2"></i>WhatsApp for Custom Order</button></a>
+    <a href="https://wa.me/923152007950" target="_blank"><button class="btn-solid mt-10 text-base px-10 py-4"><i class="fa-brands fa-whatsapp mr-2"></i>WhatsApp for Custom Order</button></a>
   </div>
 </section>
 
@@ -559,7 +558,7 @@ tailwind.config = {
     <p class="text-white/70 mt-6 text-base leading-relaxed max-w-lg mx-auto">Shop the latest collection for Men, Women & Kids. Free delivery. COD available. 30-day returns. No excuses.</p>
     <div class="flex gap-4 justify-center mt-10 flex-wrap">
       <a href="#products"><button class="btn-solid text-base px-10 py-4">Shop Now <i class="fa-solid fa-arrow-right ml-2"></i></button></a>
-      <a href="https://wa.me/923140607452" target="_blank"><button class="btn-outline text-base px-10 py-4" style="color:#fff;border-color:rgba(255,255,255,0.4);"><i class="fa-brands fa-whatsapp mr-2"></i>WhatsApp Order</button></a>
+      <a href="https://wa.me/923152007950" target="_blank"><button class="btn-outline text-base px-10 py-4" style="color:#fff;border-color:rgba(255,255,255,0.4);"><i class="fa-brands fa-whatsapp mr-2"></i>WhatsApp Order</button></a>
     </div>
   </div>
 </section>
@@ -570,7 +569,6 @@ tailwind.config = {
     <div class="grid md:grid-cols-4 gap-12 mb-12">
       <div class="md:col-span-1">
         <div class="flex items-center gap-3 mb-4">
-          <img src="logo.png" alt="SoleStride" class="h-10 w-10 object-contain rounded-lg" onerror="this.style.display='none'"/>
           <span style="font-family:'Bebas Neue',sans-serif;font-size:26px;color:#fff;letter-spacing:2px;">Sole<span style="color:#e94560;">Stride</span></span>
         </div>
         <p class="text-white/50 text-sm leading-relaxed">Walk in style with Pakistan's most loved footwear brand. Premium shoes for Men, Women & Kids — delivered to your door.</p>
@@ -578,7 +576,7 @@ tailwind.config = {
           <a href="#" class="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white/60 hover:bg-accent hover:text-white transition"><i class="fa-brands fa-facebook-f text-sm"></i></a>
           <a href="#" class="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white/60 hover:bg-accent hover:text-white transition"><i class="fa-brands fa-instagram text-sm"></i></a>
           <a href="#" class="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white/60 hover:bg-accent hover:text-white transition"><i class="fa-brands fa-tiktok text-sm"></i></a>
-          <a href="https://wa.me/923140607452" class="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white/60 hover:bg-accent hover:text-white transition"><i class="fa-brands fa-whatsapp text-sm"></i></a>
+          <a href="https://wa.me/923152007950" class="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white/60 hover:bg-accent hover:text-white transition"><i class="fa-brands fa-whatsapp text-sm"></i></a>
         </div>
       </div>
       <div>
@@ -612,11 +610,11 @@ tailwind.config = {
           </div>
           <div class="flex gap-3 items-center">
             <i class="fa-solid fa-phone text-accent text-sm"></i>
-            <a href="tel:+923140607452" class="text-white/50 hover:text-accent text-sm transition">+92 314 0607452</a>
+            <a href="tel:+923152007950" class="text-white/50 hover:text-accent text-sm transition">+92 315 2007950</a>
           </div>
           <div class="flex gap-3 items-center">
             <i class="fa-brands fa-whatsapp text-accent text-sm"></i>
-            <a href="https://wa.me/923140607452" class="text-white/50 hover:text-accent text-sm transition">WhatsApp Order</a>
+            <a href="https://wa.me/923152007950" class="text-white/50 hover:text-accent text-sm transition">WhatsApp Order</a>
           </div>
           <div class="flex gap-3 items-center">
             <i class="fa-solid fa-envelope text-accent text-sm"></i>
@@ -915,7 +913,7 @@ function submitOrder(){
   msg+=`\n💰 *Total: PKR ${total.toLocaleString()}*\n`;
   msg+=`💵 *Payment: Cash on Delivery (COD)*\n`;
   if(notes) msg+=`📝 *Notes:* ${notes}`;
-  const url=`https://wa.me/923140607452?text=${encodeURIComponent(msg)}`;
+  const url=`https://wa.me/923152007950?text=${encodeURIComponent(msg)}`;
   window.open(url,'_blank');
   cart=[]; saveCart(); updateCartBadge(); renderCartItems();
   closeOrderModal();
